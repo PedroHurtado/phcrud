@@ -43,7 +43,7 @@
             success: 'phSuccessFactoryCreate',
             error: 'phErrorHttpFactory',
             cmd: 'phCommandCreate',
-            ajaxButton:'accept'
+            ajaxCmd:'accept'
         };
     });
 

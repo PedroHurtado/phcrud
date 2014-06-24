@@ -38,7 +38,7 @@
 
         function resolveCommandFunction(key, fn) {
             self[key] = function () {
-                if (factory.ajaxButton === key) {
+                if (factory.ajaxCmd === key) {
                     resolveModel();
                     resolvePath();
                 }

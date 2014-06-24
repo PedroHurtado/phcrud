@@ -22,7 +22,7 @@
             success: 'phSucessFactoryDelete',
             error: 'phErrorHttpFactory',
             cmd: 'phCommandCreate',
-            ajaxButton: 'accept'
+            ajaxCmd: 'accept'
         };
     });
 
