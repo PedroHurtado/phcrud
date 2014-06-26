@@ -1,19 +1,18 @@
-'use strict'
+'use strict';
+
 (function (angular, undefined) {
+    var module;
     if (!angular) return;
-
-    function loader(){
-    	var module;    	    
-    	module=angular.module('phCrud', ['ngRoute']);
-    	angular.isEmpty = angular.isEmpty || (function (obj) {
-        	   for (var p in obj) {
-            	      if (obj.hasOwnProperty(p))  return false; 
-        	   }
-        	   return true;
-    	});
-
-
-
+    module=angular.module('phCrud', ['ngRoute']);
+    module.isEmpty = angular.isEmpty || (function (obj) {
+        for (var p in obj) {
+            if (obj.hasOwnProperty(p))  return false; 
+        }
+        return true;
+    });
+}
+)(window.angular);
+(function (module, undefined) {
 
     controller.$inject = ['$scope', '$attrs', 'phResolveFactory', '$routeParams'];
     function controller(scope, attrs, phFactory, params) {
@@ -22,9 +21,10 @@
             forEach = angular.forEach,
             bind = angular.bind,
             isFunction = angular.isFunction,
-            isEmpty = angular.isEmpty;
+            isEmpty = module.isEmpty;
 
         function resolveSelf() {
+            var obj;
             if (factory.as) {
                 if (obj = scope[factory.as]) {
                     return obj;
@@ -35,11 +35,11 @@
             }
             return scope;
         }
-
-        function resolveModel() {
-            if (attrs.model) {
-                scope.$eval(attrs.model);
-            }
+        function createModel() {
+            self.model = {};
+        }
+        function bindEval() {
+            self.phEval = bind(scope, scope.$eval)
         }
 
         function resolvePath() {
@@ -54,7 +54,6 @@
         function resolveCommandFunction(key, fn) {
             self[key] = function () {
                 if (factory.ajaxCmd === key) {
-                    resolveModel();
                     resolvePath();
                 }
                 fn.call(self, factory, arguments);
@@ -81,9 +80,7 @@
         }
 
         function processInitValues() {
-            if (factory.init) {
-                scope.$eval(factory.init);
-            };
+            factory.init && self.phEval(factory.init);
         }
 
         function restoreCache() {
@@ -116,7 +113,8 @@
                 checkPath(fnauto);
             }
         }
-
+        createModel();
+        bindEval();
         bindFactories();
         processCommand();
         processInitValues();
@@ -130,7 +128,7 @@
 
         return {
             restrict: 'EA',
-            scope:true,
+            scope: true,
             dynamicScope: function (attr) {
                 var value = attr.scope;
                 return (value) ? (value.toLowerCase() === "true") ? true : false : true;
@@ -138,10 +136,11 @@
             controller: controller
         };
     }
+
     module.directive('phAjax', phAjax);
 
-
-
+})(angular.module('phCrud'));
+(function (module, undefined) {
 
     phCacheFactory.$inject = ['$cacheFactory'];
     function phCacheFactory(cacheFactory) {
@@ -159,32 +158,27 @@
                 return value;
             }
         };
-    }    
+    }
     module.factory('phCacheFactory', phCacheFactory);
 
+})(angular.module('phCrud'));
+(function (module, undefined) {
 
-
-
-    phSuccessFactoryCreate.$inject = ['$window', 'phSpinnerFactory','phStatusFactory'];
-    function phSuccessFactoryCreate(window,spinner,status) {        
-
-        function assignData(response) {
-            var extend = angular.extend;
-            this.model = extend(this.model, response.data || {});
-        }
-        function back(){
+    phSuccessFactoryCreate.$inject = ['$window', 'phSpinnerFactory', 'phStatusFactory', 'phCreateModelFactory'];
+    function phSuccessFactoryCreate(window, spinner, status, createModel) {
+        function back() {
             window.history.back();
-        }        
+        }
         return {
             hide: spinner.hide,
             status: status.setStatus,
-            assignData: assignData,
+            assignModel: createModel.assignModel,
             back: back
         };
     }
 
     phCommandCreate.$inject = ['phAcceptFactory', '$window']
-    function phCommandCreate(phAcceptFactory,$window) {
+    function phCommandCreate(phAcceptFactory, $window) {
         return {
             accept: phAcceptFactory.accept,
             close: function () {
@@ -195,11 +189,11 @@
 
     module.factory('phSuccessFactoryCreate', phSuccessFactoryCreate);
     module.factory('phCommandCreate', phCommandCreate);
-   
+
 
     module.factory('phCreate', function () {
         return {
-            as: 'create',            
+            as: 'create',
             method: 'post',
             service: 'phHttpFactory',
             cacheService: 'phCacheFactory',
@@ -208,12 +202,12 @@
             success: 'phSuccessFactoryCreate',
             error: 'phErrorHttpFactory',
             cmd: 'phCommandCreate',
-            ajaxCmd:'accept'
+            ajaxCmd: 'accept'
         };
     });
 
-
-
+})(angular.module('phCrud'));
+(function (module, undefined) {
 
     phSucessFactoryDelete.$inject = ['$window', 'phSpinnerFactory'];
     function phSucessFactoryDelete(window, spinner) {
@@ -241,26 +235,26 @@
         };
     });
 
+})(angular.module('phCrud'));
+(function (module, undefined) {
 
 
-
-   
     phSuccessFactoryEdit.$inject = ['phSpinnerFactory', 'phStatusFactory', 'phCreateModelFactory']
     function phSuccessFactoryEdit(spinner, status, createModel) {
         return {
             hide: spinner.hide,
             status: status.setStatus,
-            createModel: createModel.createModel
+            assingModel: createModel.assingModel
         }
 
-    }   
-   
-    module.factory('phSuccessFactoryEdit', phSuccessFactoryEdit);  
-   
+    }
+
+    module.factory('phSuccessFactoryEdit', phSuccessFactoryEdit);
+
 
     module.factory('phEdit', function () {
         return {
-            as: 'edit',            
+            as: 'edit',
             method: 'get',
             service: 'phHttpFactory',
             cacheService: 'phCacheFactory',
@@ -272,10 +266,10 @@
             auto: 'accept'
         };
     });
-    
 
 
-
+})(angular.module('phCrud'));
+(function (module, undefined) {
 
     //Show Hide Spinner
     spinnerFactory.$inject = [];
@@ -295,44 +289,45 @@
     //Set http status
     statusFactory.$inject = [];
     function statusFactory() {
-        function setStatus (response) {            
+        function setStatus(response) {
             this.status = response.status;
         }
         return {
             setStatus: setStatus
-        };        
+        };
     }
 
     //Set response http(data) to model
-    createModelFactory.$inject=[];
+    createModelFactory.$inject = [];
     function createModelFactory() {
-        function createModel(response) {
-            this.model = response.data;
+        function assignModel(response) {
+            angular.extend(this.model, response.data || {});
         }
         return {
-            createModel: createModel
+            assignModel: assignModel
         };
     }
     //call service http 
     acceptFactory.$inject = [];
     function acceptFactory() {
         function accept(factory) {
-            factory.service(factory.path, this.filter || this.model || {});
+            var model = this.phEval(factory.fields || '') || this.filter || this.model || {};
+            factory.service(factory.path, model);
         }
         return {
-            accept:accept
+            accept: accept
         };
     }
     //run before call http
     beforeHttpFactory.$inject = ['phSpinnerFactory'];
     function beforeHttpFactory(spinner) {
         return {
-            show:spinner.show
+            show: spinner.show
         };
     }
     //run error http
     errorHttpFactory.$inject = ['phSpinnerFactory', 'phStatusFactory'];
-    function errorHttpFactory(spinner,status) {
+    function errorHttpFactory(spinner, status) {
         return {
             hide: spinner.hide,
             setStatus: status.setStatus
@@ -345,17 +340,17 @@
     module.factory('phCreateModelFactory', createModelFactory);
     module.factory('phAcceptFactory', acceptFactory);
     module.factory('phBeforeHttpFactory', beforeHttpFactory);
-    module.factory('phErrorHttpFactory', errorHttpFactory);    
+    module.factory('phErrorHttpFactory', errorHttpFactory);
 
     module.constant('accept', 'accept');
 
-
-
+})(angular.module('phCrud'));
+(function (module, undefined) {
 
     phHttpFactory.$inject = ['$http'];
     function phHttpFactory(http) {
 
-        var forEach = angular.forEach, service = {}, extend = angular.extend,isFunction=angular.isFunction;
+        var forEach = angular.forEach, service = {}, extend = angular.extend, isFunction = angular.isFunction;
 
         function resolve(action, response) {
             forEach(action, function (value) {
@@ -408,31 +403,31 @@
         return service;
     };
 
-   
+
     module.factory('phHttpFactory', phHttpFactory);
 
+})(angular.module('phCrud'));
+(function (module, undefined) {
 
 
-
-   
     phSuccessFactoryIndex.$inject = ['phSpinnerFactory', 'phStatusFactory', 'phCreateModelFactory']
     function phSuccessFactoryIndex(spinner, status, createModel) {
         return {
             hide: spinner.hide,
             status: status.setStatus,
-            createModel: createModel.createModel
+            assignModel: createModel.assignModel
         }
 
     }
 
     phCommandIndex.$inject = ['phAcceptFactory'];
     function phCommandIndex(accept) {
-        
-        function nextPage(factory) {            
+
+        function nextPage(factory) {
             this.filter.page++;
             this.accept(factory);
         }
-        function previousPage(factory) {           
+        function previousPage(factory) {
             if (this.filter.page === 0) return;
             this.filter.page--;
             this.accept(factory);
@@ -440,14 +435,14 @@
         return {
             accept: accept.accept,
             nextPage: nextPage,
-            previousPage:previousPage
+            previousPage: previousPage
         };
 
     }
-   
+
     module.factory('phSuccessFactoryIndex', phSuccessFactoryIndex);
     module.factory('phCommandIndex', phCommandIndex);
-   
+
 
     module.factory('phIndex', function () {
         return {
@@ -464,17 +459,18 @@
             auto: 'accept'
         };
     });
-    
 
 
+})(angular.module('phCrud'));
+(function (module, undefined) {
 
-   
 
     module.factory('phPut', function () {
         return {
-            as: 'put',            
+            as: 'put',
+            init: 'put.model=edit.model',
             method: 'put',
-            service: 'phHttpFactory',            
+            service: 'phHttpFactory',
             before: 'phBeforeHttpFactory',
             success: 'phSuccessFactoryCreate',
             error: 'phErrorHttpFactory',
@@ -483,13 +479,13 @@
         };
     });
 
+})(angular.module('phCrud'));
+(function (module, undefined) {
 
+    phResolveFactory.$inject = ['$injector', '$parse', 'phResolvePathService', '$location'];
+    function phResolveFactory(injector, parse, resolvePath, location) {
 
-
-    phResolveFactory.$inject = ['$injector', '$parse', 'phResolvePathService','$location'];
-    function phResolveFactory(injector, parse, resolvePath,location) {
-      
-        function resolveFactory  (factory, path) {
+        function resolveFactory(factory, path) {
             var forEach = angular.forEach, extend = angular.extend;
             forEach(['config', 'before', 'success', 'error', 'cmd', 'auto', 'service', 'cacheService'], function (value) {
                 factory[value] = factory[value] ? injector.get(factory[value]) : undefined;
@@ -513,7 +509,8 @@
 
     module.factory('phResolveFactory', phResolveFactory);
 
-
+})(angular.module('phCrud'));
+(function (module, undefined) {
 
     resolvePath.$inject = ['$location'];
     function resolvePath(location) {
@@ -550,7 +547,7 @@
         this.resolve = function (path) {
             if (!path) return { path: location.path() };
 
-            if (path && path.indexOf('{{') === -1) return { path: path };           
+            if (path && path.indexOf('{{') === -1) return { path: path };
 
             return {
                 path: path,
@@ -561,7 +558,4 @@
 
     module.service('phResolvePathService', resolvePath)
 
-
-}
-loader();
-})(window.angular);
+})(angular.module('phCrud'));

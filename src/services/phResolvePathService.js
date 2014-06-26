@@ -1,4 +1,4 @@
-﻿(function (module,undefined) {
+﻿(function (module, undefined) {
 
     resolvePath.$inject = ['$location'];
     function resolvePath(location) {
@@ -35,7 +35,7 @@
         this.resolve = function (path) {
             if (!path) return { path: location.path() };
 
-            if (path && path.indexOf('{{') === -1) return { path: path };           
+            if (path && path.indexOf('{{') === -1) return { path: path };
 
             return {
                 path: path,
@@ -46,4 +46,4 @@
 
     module.service('phResolvePathService', resolvePath)
 
-})(angular.module('phCrud'))
+})(angular.module('phCrud'));

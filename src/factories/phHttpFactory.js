@@ -3,7 +3,7 @@
     phHttpFactory.$inject = ['$http'];
     function phHttpFactory(http) {
 
-        var forEach = angular.forEach, service = {}, extend = angular.extend,isFunction=angular.isFunction;
+        var forEach = angular.forEach, service = {}, extend = angular.extend, isFunction = angular.isFunction;
 
         function resolve(action, response) {
             forEach(action, function (value) {
@@ -56,7 +56,7 @@
         return service;
     };
 
-   
+
     module.factory('phHttpFactory', phHttpFactory);
 
 })(angular.module('phCrud'));

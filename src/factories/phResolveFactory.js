@@ -1,9 +1,9 @@
 ﻿(function (module, undefined) {
 
-    phResolveFactory.$inject = ['$injector', '$parse', 'phResolvePathService','$location'];
-    function phResolveFactory(injector, parse, resolvePath,location) {
-      
-        function resolveFactory  (factory, path) {
+    phResolveFactory.$inject = ['$injector', '$parse', 'phResolvePathService', '$location'];
+    function phResolveFactory(injector, parse, resolvePath, location) {
+
+        function resolveFactory(factory, path) {
             var forEach = angular.forEach, extend = angular.extend;
             forEach(['config', 'before', 'success', 'error', 'cmd', 'auto', 'service', 'cacheService'], function (value) {
                 factory[value] = factory[value] ? injector.get(factory[value]) : undefined;
@@ -27,4 +27,4 @@
 
     module.factory('phResolveFactory', phResolveFactory);
 
-})(angular.module('phCrud'))
+})(angular.module('phCrud'));

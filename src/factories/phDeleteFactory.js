@@ -1,4 +1,4 @@
-﻿(function (module,undefined) {
+﻿(function (module, undefined) {
 
     phSucessFactoryDelete.$inject = ['$window', 'phSpinnerFactory'];
     function phSucessFactoryDelete(window, spinner) {
@@ -26,4 +26,4 @@
         };
     });
 
-})(angular.module('phCrud'))
+})(angular.module('phCrud'));

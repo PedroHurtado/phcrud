@@ -1,22 +1,22 @@
-﻿(function (module,undefined) {
+﻿(function (module, undefined) {
 
-   
+
     phSuccessFactoryEdit.$inject = ['phSpinnerFactory', 'phStatusFactory', 'phCreateModelFactory']
     function phSuccessFactoryEdit(spinner, status, createModel) {
         return {
             hide: spinner.hide,
             status: status.setStatus,
-            createModel: createModel.createModel
+            assingModel: createModel.assingModel
         }
 
-    }   
-   
-    module.factory('phSuccessFactoryEdit', phSuccessFactoryEdit);  
-   
+    }
+
+    module.factory('phSuccessFactoryEdit', phSuccessFactoryEdit);
+
 
     module.factory('phEdit', function () {
         return {
-            as: 'edit',            
+            as: 'edit',
             method: 'get',
             service: 'phHttpFactory',
             cacheService: 'phCacheFactory',
@@ -28,6 +28,6 @@
             auto: 'accept'
         };
     });
-    
+
 
 })(angular.module('phCrud'));

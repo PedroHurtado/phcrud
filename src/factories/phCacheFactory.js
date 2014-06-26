@@ -16,7 +16,7 @@
                 return value;
             }
         };
-    }    
+    }
     module.factory('phCacheFactory', phCacheFactory);
 
-})(angular.module('phCrud'))
+})(angular.module('phCrud'));

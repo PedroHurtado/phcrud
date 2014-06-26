@@ -7,9 +7,10 @@
             forEach = angular.forEach,
             bind = angular.bind,
             isFunction = angular.isFunction,
-            isEmpty = angular.isEmpty;
+            isEmpty = module.isEmpty;
 
         function resolveSelf() {
+            var obj;
             if (factory.as) {
                 if (obj = scope[factory.as]) {
                     return obj;
@@ -20,11 +21,11 @@
             }
             return scope;
         }
-
-        function resolveModel() {
-            if (attrs.model) {
-                scope.$eval(attrs.model);
-            }
+        function createModel() {
+            self.model = {};
+        }
+        function bindEval() {
+            self.phEval = bind(scope, scope.$eval)
         }
 
         function resolvePath() {
@@ -39,7 +40,6 @@
         function resolveCommandFunction(key, fn) {
             self[key] = function () {
                 if (factory.ajaxCmd === key) {
-                    resolveModel();
                     resolvePath();
                 }
                 fn.call(self, factory, arguments);
@@ -66,9 +66,7 @@
         }
 
         function processInitValues() {
-            if (factory.init) {
-                scope.$eval(factory.init);
-            };
+            factory.init && self.phEval(factory.init);
         }
 
         function restoreCache() {
@@ -101,7 +99,8 @@
                 checkPath(fnauto);
             }
         }
-
+        createModel();
+        bindEval();
         bindFactories();
         processCommand();
         processInitValues();
@@ -115,7 +114,7 @@
 
         return {
             restrict: 'EA',
-            scope:true,
+            scope: true,
             dynamicScope: function (attr) {
                 var value = attr.scope;
                 return (value) ? (value.toLowerCase() === "true") ? true : false : true;
@@ -123,6 +122,7 @@
             controller: controller
         };
     }
+
     module.directive('phAjax', phAjax);
 
-})(angular.module('phCrud'))
+})(angular.module('phCrud'));

@@ -1,4 +1,4 @@
-﻿(function (module,undefined) {
+﻿(function (module, undefined) {
 
     //Show Hide Spinner
     spinnerFactory.$inject = [];
@@ -18,44 +18,45 @@
     //Set http status
     statusFactory.$inject = [];
     function statusFactory() {
-        function setStatus (response) {            
+        function setStatus(response) {
             this.status = response.status;
         }
         return {
             setStatus: setStatus
-        };        
+        };
     }
 
     //Set response http(data) to model
-    createModelFactory.$inject=[];
+    createModelFactory.$inject = [];
     function createModelFactory() {
-        function createModel(response) {
-            this.model = response.data;
+        function assignModel(response) {
+            angular.extend(this.model, response.data || {});
         }
         return {
-            createModel: createModel
+            assignModel: assignModel
         };
     }
     //call service http 
     acceptFactory.$inject = [];
     function acceptFactory() {
         function accept(factory) {
-            factory.service(factory.path, this.filter || this.model || {});
+            var model = this.phEval(factory.fields || '') || this.filter || this.model || {};
+            factory.service(factory.path, model);
         }
         return {
-            accept:accept
+            accept: accept
         };
     }
     //run before call http
     beforeHttpFactory.$inject = ['phSpinnerFactory'];
     function beforeHttpFactory(spinner) {
         return {
-            show:spinner.show
+            show: spinner.show
         };
     }
     //run error http
     errorHttpFactory.$inject = ['phSpinnerFactory', 'phStatusFactory'];
-    function errorHttpFactory(spinner,status) {
+    function errorHttpFactory(spinner, status) {
         return {
             hide: spinner.hide,
             setStatus: status.setStatus
@@ -68,8 +69,8 @@
     module.factory('phCreateModelFactory', createModelFactory);
     module.factory('phAcceptFactory', acceptFactory);
     module.factory('phBeforeHttpFactory', beforeHttpFactory);
-    module.factory('phErrorHttpFactory', errorHttpFactory);    
+    module.factory('phErrorHttpFactory', errorHttpFactory);
 
     module.constant('accept', 'accept');
 
-})(angular.module('phCrud'))
+})(angular.module('phCrud'));

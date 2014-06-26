@@ -1,24 +1,24 @@
 ﻿(function (module, undefined) {
 
-   
+
     phSuccessFactoryIndex.$inject = ['phSpinnerFactory', 'phStatusFactory', 'phCreateModelFactory']
     function phSuccessFactoryIndex(spinner, status, createModel) {
         return {
             hide: spinner.hide,
             status: status.setStatus,
-            createModel: createModel.createModel
+            assignModel: createModel.assignModel
         }
 
     }
 
     phCommandIndex.$inject = ['phAcceptFactory'];
     function phCommandIndex(accept) {
-        
-        function nextPage(factory) {            
+
+        function nextPage(factory) {
             this.filter.page++;
             this.accept(factory);
         }
-        function previousPage(factory) {           
+        function previousPage(factory) {
             if (this.filter.page === 0) return;
             this.filter.page--;
             this.accept(factory);
@@ -26,14 +26,14 @@
         return {
             accept: accept.accept,
             nextPage: nextPage,
-            previousPage:previousPage
+            previousPage: previousPage
         };
 
     }
-   
+
     module.factory('phSuccessFactoryIndex', phSuccessFactoryIndex);
     module.factory('phCommandIndex', phCommandIndex);
-   
+
 
     module.factory('phIndex', function () {
         return {
@@ -50,6 +50,6 @@
             auto: 'accept'
         };
     });
-    
+
 
 })(angular.module('phCrud'));
